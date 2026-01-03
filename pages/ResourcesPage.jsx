@@ -1,103 +1,137 @@
-// pages/ResourcesPage.jsx
 import React, { useMemo, useState, useEffect } from "react";
-import { RESOURCES_MENU_ITEMS } from "../data/resourcesData";
 import {
   ArrowLeft,
   Search,
   Play,
   X,
-  Film,
   Image,
+  Film,
   Headphones,
 } from "lucide-react";
+import { RESOURCES_MENU_ITEMS } from "../data/resourcesData";
 
 /* ---------------------------
-   Small util
+   Utilities
 --------------------------- */
-const truncate = (txt, n = 120) =>
-  txt && txt.length > n ? txt.slice(0, n - 1) + "…" : txt;
+const truncate = (text, n = 140) =>
+  text && text.length > n ? text.slice(0, n) + "…" : text;
 
 /* ---------------------------
    Resource Card
 --------------------------- */
 const ResourceCard = ({ item, onOpen }) => {
-  const seed = item.id?.charCodeAt(0) % 5;
-  const gradients = [
-    "from-[#ff7a8a] via-[#ffb86b] to-[#ffd86b]",
-    "from-[#8b5cf6] via-[#06b6d4] to-[#06d6a0]",
-    "from-[#06b6d4] via-[#7c3aed] to-[#a78bfa]",
-    "from-[#ff7a8a] via-[#ffb86b] to-[#7c3aed]",
-    "from-[#00c3ff] via-[#0066ff] to-[#7c3aed]",
-  ];
-  const g = gradients[seed];
-
   return (
-    <article className="relative overflow-hidden rounded-3xl shadow-2xl transform hover:-translate-y-2 transition-all">
-      <div className={`h-48 bg-gradient-to-br ${g} flex items-end p-4`}>
-        <div className="flex gap-3 items-center">
-          <div className="w-14 h-14 rounded-lg overflow-hidden border bg-white/10">
-            <img src={item.image} alt={item.title} className="w-full h-full object-cover" />
+    <div className="rounded-3xl overflow-hidden bg-white shadow-xl hover:-translate-y-1 transition-all duration-300">
+      <div className="h-44 bg-gradient-to-br from-[#0d8db9] to-[#7c3aed] p-4 flex items-end">
+        <div className="flex items-center gap-3 text-white">
+          <div className="w-14 h-14 rounded-xl overflow-hidden bg-white/20">
+            <img
+              src={item.image || "/images/resources/default.jpg"}
+              alt={item.title}
+              className="w-full h-full object-cover"
+            />
           </div>
-          <div className="text-white">
-            <h3 className="font-semibold">{item.title}</h3>
-            <span className="text-xs bg-white/10 px-2 py-1 rounded-full">
-              {item.category || "General"}
-            </span>
+          <div>
+            <h3 className="font-semibold leading-tight">{item.title}</h3>
+            <span className="text-xs opacity-90">{item.category}</span>
           </div>
         </div>
       </div>
 
-      <div className="bg-white p-4">
-        <p className="text-sm text-gray-700">{truncate(item.description, 140)}</p>
-        <div className="mt-4 flex justify-between items-center">
+      <div className="p-4">
+        <p className="text-sm text-gray-600 min-h-[3.5rem]">
+          {truncate(item.description)}
+        </p>
+
+        <div className="mt-4 flex items-center justify-between">
           <button
             onClick={() => onOpen(item)}
-            className="flex items-center gap-2 px-4 py-2 bg-[#0d8db9] text-white rounded-full text-sm font-semibold"
+            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#0d8db9] text-white text-sm font-semibold hover:bg-[#0b769a]"
           >
             <Play size={14} /> Open
           </button>
-          <span className="text-xs text-gray-400">{item.id}</span>
+          <span className="text-xs text-gray-400">ID: {item.id}</span>
         </div>
       </div>
-    </article>
+    </div>
   );
 };
 
 /* ---------------------------
-   Detail Modal
+   Resource Detail Modal
 --------------------------- */
-const ResourceDetailModal = ({ item, onClose, onRequest }) => {
+const ResourceDetailModal = ({ item, onClose }) => {
   if (!item) return null;
+
+  const requestAsset = () => {
+    window.dispatchEvent(
+      new CustomEvent("open-consultation", {
+        detail: {
+          source: "resources",
+          asset: item.title,
+        },
+      })
+    );
+    onClose();
+  };
 
   return (
     <div
-      className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-6"
+      className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-6"
       onClick={(e) => e.target === e.currentTarget && onClose()}
     >
-      <div className="bg-white max-w-4xl w-full rounded-2xl overflow-hidden shadow-2xl">
+      <div className="bg-white rounded-2xl max-w-4xl w-full overflow-hidden shadow-2xl">
         <div className="relative">
-          <img src={item.image} alt={item.title} className="w-full h-56 object-cover" />
+          <img
+            src={item.image || "/images/resources/default.jpg"}
+            alt={item.title}
+            className="w-full h-56 object-cover"
+          />
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 bg-white rounded-full p-2"
+            className="absolute top-4 right-4 bg-white/90 rounded-full p-2 shadow"
           >
-            <X />
+            <X size={18} />
           </button>
         </div>
 
         <div className="p-6">
-          <h2 className="text-2xl font-bold">{item.title}</h2>
-          <p className="mt-2 text-gray-600">{item.description}</p>
+          <h2 className="text-2xl font-bold text-[#0f1724]">
+            {item.title}
+          </h2>
+          <p className="text-sm text-gray-600 mt-2">
+            {item.description}
+          </p>
 
-          <div className="mt-6 flex justify-between items-center">
+          <div className="grid md:grid-cols-2 gap-6 mt-6">
+            <div>
+              <h4 className="font-semibold mb-2">What this resource provides</h4>
+              <p className="text-sm text-gray-600">
+                A professionally curated asset created by our research and
+                strategy teams for founders, growth teams and decision makers.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-semibold mb-2">How to access</h4>
+              <p className="text-sm text-gray-600">
+                Click request and our advisory team will share this asset and
+                guide you on applying it to your specific use case.
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-8 flex items-center gap-4">
             <button
-              onClick={onRequest}
-              className="bg-[#0d8db9] hover:bg-[#0b769a] text-white px-6 py-3 rounded-full font-semibold"
+              onClick={requestAsset}
+              className="bg-[#0d8db9] hover:bg-[#0b769a] text-white px-6 py-3 rounded-full font-semibold shadow-lg"
             >
               Request This Asset
             </button>
-            <span className="text-sm text-gray-500">
-              Category: {item.category || "General"}
+            <span className="ml-auto text-sm text-gray-500">
+              Category:{" "}
+              <span className="font-medium text-gray-700">
+                {item.category}
+              </span>
             </span>
           </div>
         </div>
@@ -107,79 +141,120 @@ const ResourceDetailModal = ({ item, onClose, onRequest }) => {
 };
 
 /* ---------------------------
-   Page Component
+   Main Page
 --------------------------- */
 const ResourcesPage = ({ setCurrentPage }) => {
-  const [q, setQ] = useState("");
-  const [filter, setFilter] = useState("All");
+  const [query, setQuery] = useState("");
+  const [category, setCategory] = useState("All");
   const [selected, setSelected] = useState(null);
   const [page, setPage] = useState(1);
+
   const PER_PAGE = 9;
 
-  const openConsultationModal = () => {
-    window.dispatchEvent(
-      new CustomEvent("open-consultation", {
-        detail: { source: "resources", asset: selected?.title || null },
-      })
-    );
-  };
-
   const filtered = useMemo(() => {
-    const search = q.toLowerCase();
+    const q = query.toLowerCase();
     return RESOURCES_MENU_ITEMS.filter((r) => {
-      if (filter !== "All" && r.category?.toLowerCase() !== filter.toLowerCase()) return false;
-      if (!search) return true;
+      if (category !== "All" && r.category !== category) return false;
+      if (!q) return true;
       return (
-        r.title.toLowerCase().includes(search) ||
-        r.description.toLowerCase().includes(search) ||
-        r.id.toLowerCase().includes(search)
+        r.title.toLowerCase().includes(q) ||
+        r.description.toLowerCase().includes(q)
       );
     });
-  }, [q, filter]);
+  }, [query, category]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
-  const paged = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const items = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
-  useEffect(() => setPage(1), [q, filter]);
+  useEffect(() => setPage(1), [query, category]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#0b1220] to-[#0b1724] text-white">
-      <header className="pt-24 pb-12 max-w-7xl mx-auto px-6">
+      {/* HEADER */}
+      <div className="pt-24 pb-10 max-w-7xl mx-auto px-6">
         <button
-          onClick={() => setCurrentPage?.("home")}
-          className="flex items-center gap-2 text-[#9fe6ff] mb-4"
+          onClick={() => setCurrentPage("home")}
+          className="flex items-center gap-2 text-sm text-[#9fe6ff] mb-4"
         >
           <ArrowLeft size={16} /> Back to Home
         </button>
 
-        <h1 className="text-4xl font-extrabold">Resources & Knowledge Hub</h1>
-        <p className="text-gray-300 mt-2">
-          Browse premium assets, guides and media.
+        <h1 className="text-4xl font-extrabold">
+          Resources & Knowledge Hub
+        </h1>
+        <p className="text-gray-300 mt-2 max-w-3xl">
+          Curated playbooks, templates, media and research assets built for
+          founders, operators and investors.
         </p>
 
-        <div className="mt-6 relative max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-black" size={18} />
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            className="w-full pl-10 pr-4 py-3 rounded-full text-black"
-            placeholder="Search resources..."
-          />
-        </div>
-      </header>
+        {/* SEARCH + FILTER */}
+        <div className="mt-6 flex flex-col md:flex-row gap-4">
+          <div className="relative w-full md:w-96">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search resources..."
+              className="w-full pl-10 pr-4 py-3 rounded-full text-black"
+            />
+          </div>
 
-      <main className="max-w-7xl mx-auto px-6 pb-16">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {paged.map((item) => (
-            <ResourceCard key={item.id} item={item} onOpen={setSelected} />
+          <select
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+            className="rounded-full px-4 py-3 text-black"
+          >
+            <option value="All">All</option>
+            {[...new Set(RESOURCES_MENU_ITEMS.map(r => r.category))].map(c => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* GRID */}
+      <div className="max-w-7xl mx-auto px-6 pb-16">
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {items.map((item) => (
+            <ResourceCard
+              key={item.id}
+              item={item}
+              onOpen={() => setSelected(item)}
+            />
           ))}
         </div>
-      </main>
 
+        {/* PAGINATION */}
+        <div className="mt-10 flex items-center justify-between text-sm text-gray-300">
+          <span>
+            Showing {(page - 1) * PER_PAGE + 1}–
+            {Math.min(page * PER_PAGE, filtered.length)} of{" "}
+            {filtered.length}
+          </span>
+
+          <div className="flex gap-2">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={page === 1}
+              className="px-3 py-2 rounded bg-white/10 disabled:opacity-40"
+            >
+              Prev
+            </button>
+            <button
+              onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+              className="px-3 py-2 rounded bg-white/10 disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* MODAL */}
       <ResourceDetailModal
         item={selected}
         onClose={() => setSelected(null)}
-        onRequest={openConsultationModal}
       />
     </div>
   );
