@@ -1,12 +1,4 @@
 import React, { useMemo, useState, useEffect } from "react";
-const [mounted, setMounted] = useState(false);
-
-useEffect(() => {
-  setMounted(true);
-}, []);
-
-if (!mounted) return null;
-
 import {
   ArrowLeft,
   Search,
@@ -113,7 +105,9 @@ const ResourceDetailModal = ({ item, onClose }) => {
 
           <div className="grid md:grid-cols-2 gap-6 mt-6">
             <div>
-              <h4 className="font-semibold mb-2">What this resource provides</h4>
+              <h4 className="font-semibold mb-2">
+                What this resource provides
+              </h4>
               <p className="text-sm text-gray-600">
                 A professionally curated asset created by our research and
                 strategy teams for founders, growth teams and decision makers.
@@ -149,15 +143,22 @@ const ResourceDetailModal = ({ item, onClose }) => {
 };
 
 /* ---------------------------
-   Main Page
+   Main Page (FIXED)
 --------------------------- */
 const ResourcesPage = ({ setCurrentPage }) => {
+  const [mounted, setMounted] = useState(false);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("All");
   const [selected, setSelected] = useState(null);
   const [page, setPage] = useState(1);
 
   const PER_PAGE = 9;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   const filtered = useMemo(() => {
     const q = query.toLowerCase();
@@ -195,10 +196,12 @@ const ResourcesPage = ({ setCurrentPage }) => {
           founders, operators and investors.
         </p>
 
-        {/* SEARCH + FILTER */}
         <div className="mt-6 flex flex-col md:flex-row gap-4">
           <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+              size={18}
+            />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
@@ -259,7 +262,6 @@ const ResourcesPage = ({ setCurrentPage }) => {
         </div>
       </div>
 
-      {/* MODAL */}
       <ResourceDetailModal
         item={selected}
         onClose={() => setSelected(null)}
