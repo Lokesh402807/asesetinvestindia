@@ -1,4 +1,12 @@
 import React, { useMemo, useState, useEffect } from "react";
+const [mounted, setMounted] = useState(false);
+
+useEffect(() => {
+  setMounted(true);
+}, []);
+
+if (!mounted) return null;
+
 import {
   ArrowLeft,
   Search,
